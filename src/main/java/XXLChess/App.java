@@ -141,7 +141,7 @@ public class App extends PApplet {
         chessType.put("e", w_chancellor);
         chessType.put("q", w_queen);
 
-        // print chesslist
+        // print chessList
         PImage chessT;
         for (int i = 0; i < BOARD_WIDTH; i++) {
             for (int j = 0; j < BOARD_WIDTH; j++) {
