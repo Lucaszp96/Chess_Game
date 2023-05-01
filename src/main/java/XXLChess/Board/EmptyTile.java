@@ -4,12 +4,12 @@ import XXLChess.Piece.Piece;
 
 public class EmptyTile extends Tile {
 
-    public EmptyTile(int boardNum) {
-        super(boardNum);
+    public EmptyTile(int tileNow) {
+        super(tileNow);
     }
 
     @Override
-    public boolean isBoardOccupied() {
+    public boolean isTileOccupied() {
         return false;
     }
 
