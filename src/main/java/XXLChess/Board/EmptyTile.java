@@ -17,4 +17,8 @@ public class EmptyTile extends Tile {
     public Piece getPiece() {
         return null;
     }
+    @Override
+    public String toString(){
+        return " ";
+    }
 }

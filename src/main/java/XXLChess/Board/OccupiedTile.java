@@ -12,11 +12,16 @@ public class OccupiedTile extends Tile {
 
     @Override
     public boolean isTileOccupied() {
-        return false;
+        return true;
     }
 
     @Override
     public Piece getPiece() {
         return pieceOn;
+    }
+
+    @Override
+    public String toString(){
+        return getPiece().toString();
     }
 }
