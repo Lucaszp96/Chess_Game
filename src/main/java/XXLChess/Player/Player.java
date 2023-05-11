@@ -25,33 +25,14 @@ public abstract class Player {
         legalMoves.addAll(castling(legalMoves, enemyMoves));
 //        this.allLegalMoves = (List<Move>) Iterables.concat(legalMoves, castling(legalMoves, enemyMoves));
         this.allLegalMoves = legalMoves;
-        this.inCheck = !underAttacks(this.playerKing.pieceLocation(), enemyMoves).isEmpty();//Do not have inCheck in constructor. it will lead to a Dead Loop
+        this.inCheck = !Player.underAttacks(this.playerKing.pieceLocation(), enemyMoves).isEmpty();//Do not have inCheck in constructor. it will lead to a Dead Loop
     }
     public King getPlayerKing() {
         return playerKing;
     }
-    public List<Move> getLegalMoves() {
+    public List<Move> getAllLegalMoves() {
         return allLegalMoves;
     }
-
-    // catch all enemyMoves and player's king chess location, if king is under attacked. weather any enemyMoves destination is same as king location
-    public static List<Move> underAttacks(int pieceLocation, List<Move> enemyMoves) {
-        List<Move> attackMoves = new ArrayList<>();
-        for (Move move : enemyMoves){
-            if (pieceLocation == move.getDestination()){
-                attackMoves.add(move);
-            }
-        }
-        return attackMoves;
-    }
-    private King fingKing() { // check if the board has a king chess 判断是否合法有没有King
-        for (Piece piece : allActivePieces()){
-            if (piece.getPieceColorType().equals("K") || piece.getPieceColorType().equals("k")){
-                return (King) piece;
-            }
-        }throw new RuntimeException("Not a valid board!");
-    }
-
     public  boolean isLegalMove(Move move){ // weather a legal move
         return this.allLegalMoves.contains(move);
     }
@@ -83,15 +64,35 @@ public abstract class Player {
             System.out.println("ILLEGAL_MOVE");
             return new MoveToTile(this.board, move, MoveCheck.ILLEGAL_MOVE);
         }
-        Board transitionBoard = move.active();
-        List<Move> kingUnderAttacks = underAttacks(transitionBoard.currentPlayer().getEnemy().getPlayerKing().pieceLocation(), transitionBoard.currentPlayer().getLegalMoves());
+        Board transitionBoard = move.active(); // After this method current player has changed
+        // Get all enemy's pieces
+        List<Move> kingUnderAttacks = Player.underAttacks(transitionBoard.currentPlayer().getEnemy().getPlayerKing().pieceLocation(),
+                                                            transitionBoard.currentPlayer().getAllLegalMoves());
         //TODO check the rule
-//        if(transitionBoard.currentPlayer().getEnemy().inCheck()){ // if king is being attacked return current game board and in check
-//            System.out.println("PLAYER_IN_CHECK");
-//            return new MoveToTile(this.board, move, MoveCheck.PLAYER_IN_CHECK);
-//        }
+        //if(transitionBoard.currentPlayer().getEnemy().inCheck()){ // if king is being attacked return current game board and in check
+        if(!kingUnderAttacks.isEmpty()){
+            System.out.println("PLAYER_IN_CHECK");
+            return new MoveToTile(this.board, move, MoveCheck.PLAYER_IN_CHECK);
+        }
         System.out.println("DONE");
         return new MoveToTile(transitionBoard, move, MoveCheck.DONE);
+    }
+    public static List<Move> underAttacks(int pieceLocation, List<Move> enemyMoves) {
+        List<Move> attackMoves = new ArrayList<>();
+        for (Move move : enemyMoves){
+            if (pieceLocation == move.getDestination()){
+                attackMoves.add(move);
+            }
+        }
+        return attackMoves;
+    }
+    // catch all enemyMoves and player's king chess location, if king is under attacked. weather any enemyMoves destination is same as king location
+    private King fingKing() { // check if the board has a king chess 判断是否合法有没有King
+        for (Piece piece : allActivePieces()){
+            if (piece.getPieceColorType().equals("K") || piece.getPieceColorType().equals("k")){
+                return (King) piece;
+            }
+        }throw new RuntimeException("Not a valid board!");
     }
     public abstract List<Piece> allActivePieces();
     public abstract PieceColour pieceColour();

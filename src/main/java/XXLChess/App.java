@@ -207,6 +207,7 @@ public class App extends PApplet {
                 if (playerMovedPiece == null){
                     tile = null;
                 }else {
+                    //TODO highlight legalMoves
                     System.out.println("Color:" + playerMovedPiece.pieceColour());
                     System.out.println("Type:" + playerMovedPiece.getPieceColorType());
                     System.out.println("-----------" );

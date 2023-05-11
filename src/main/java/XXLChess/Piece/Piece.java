@@ -17,6 +17,7 @@ public abstract class Piece {
         this.pieceLocation = pieceLocation;
         this.pieceColour = piececolour;
         this.code = this.hashCode();
+        this.firstMove = true;
     }
     public PieceColour pieceColour(){
         return this.pieceColour;

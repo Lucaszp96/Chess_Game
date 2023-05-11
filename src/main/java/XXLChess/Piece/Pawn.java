@@ -30,7 +30,7 @@ public class Pawn extends Piece{
             Tile destinationTile = board.getTile(destination);
             if (!destinationTile.isTileOccupied() && (currentCandidate == 14 )) { //Move 1 space
                 legalMoves.add(new NonAttackMove(board, this, destination));
-            } else if (currentCandidate == 28 && this.firstMove() ) { //Move 2 space & check first move
+            } else if (!destinationTile.isTileOccupied() && (currentCandidate == 28) && this.firstMove()) { //Move 2 space & check first move
                 int upDestination = destination - 14; //white piece
                 int downDestination = destination + 14; //black piece
                 if (this.pieceColour.white() && !destinationTile.isTileOccupied() && !board.getTile(upDestination).isTileOccupied()){
@@ -41,9 +41,9 @@ public class Pawn extends Piece{
                     legalMoves.add(new NonAttackMove(board, this, destination));
                     this.setFirstMove(false);
                 }
-            } else if( currentCandidate == 13 &&
-                    (!BoardUtils.FIRST_TO_LAST_COLUMN[this.pieceLocation] && this.pieceColour.white() ||
-                            !BoardUtils.FIRST_COLUMN[this.pieceLocation] && this.pieceColour.black())){ // Edge check
+            } else if( currentCandidate == 13 &&  // 最后一列白棋，规则失效， 第一列黑棋 规则失效
+                    (!(BoardUtils.FIRST_TO_LAST_COLUMN[this.pieceLocation] && this.pieceColour.white()) ||
+                            !(BoardUtils.FIRST_COLUMN[this.pieceLocation] && this.pieceColour.black()))){ // Edge check
                 if (destinationTile.isTileOccupied()){
                     Piece pieceOccupied = destinationTile.getPiece();
                     if (this.pieceColour != pieceOccupied.pieceColour()){
@@ -51,8 +51,8 @@ public class Pawn extends Piece{
                     }
                 }
             } else if (currentCandidate == 15 &&
-                        (!BoardUtils.FIRST_COLUMN[this.pieceLocation] && this.pieceColour.white() ||
-                                !BoardUtils.FIRST_TO_LAST_COLUMN[this.pieceLocation] && this.pieceColour.black())) { // Edge check
+                        (!(BoardUtils.FIRST_COLUMN[this.pieceLocation] && this.pieceColour.white()) ||
+                                !(BoardUtils.FIRST_TO_LAST_COLUMN[this.pieceLocation] && this.pieceColour.black()))) { // Edge check
                 if (destinationTile.isTileOccupied()){
                     Piece pieceOccupied = destinationTile.getPiece();
                     if (this.pieceColour != pieceOccupied.pieceColour()){

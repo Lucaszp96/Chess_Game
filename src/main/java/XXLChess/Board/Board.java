@@ -28,8 +28,9 @@ public class Board {
         this.blackPieces = allPieceOnBoard(this.gameBoard, PieceColour.BLACK); //All black pieces
         List<Move> whitePieceMoves = legalMoves(this.whitePieces);
         List<Move> blackPieceMoves = legalMoves(this.blackPieces);
+        //TODO 生成缓存棋盘时pieceMoves得数量为23，20与程序启动时得34不符
         this.whitePlayer = new WhitePlayer(this, whitePieceMoves, blackPieceMoves);
-        this.blackPlayer = new BlackPlayer(this, whitePieceMoves, blackPieceMoves);
+        this.blackPlayer = new BlackPlayer(this, blackPieceMoves, whitePieceMoves);
         this.currentPlayer = boardBuilder.movePlayer.setPlayer(this.whitePlayer, this.blackPlayer);
     }
     public Tile getTile(int destination) {
@@ -62,7 +63,9 @@ public class Board {
         return legalMoves;
     }
     public Iterable<Move> getAllLegalMoves(){
-        return Iterables.unmodifiableIterable(Iterables.concat(this.whitePlayer.getLegalMoves(), this.blackPlayer.getLegalMoves()));
+//        List<Move> whitePlayerAllLegalMoves = this.whitePlayer.getAllLegalMoves();
+//        List<Move> blackPlayerAllLegalMoves = this.blackPlayer.getAllLegalMoves();
+        return Iterables.unmodifiableIterable(Iterables.concat(this.whitePlayer.getAllLegalMoves(), this.blackPlayer.getAllLegalMoves()));
     }
     public static List<Piece> allPieceOnBoard(List<Tile> gameBoard, PieceColour pieceColour) {// tracking all pieces(BLACK/WHITE)
         List<Piece> piecesOnBoard = new ArrayList<>();

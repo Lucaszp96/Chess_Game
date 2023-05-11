@@ -8,11 +8,11 @@ public enum PieceColour {
     WHITE(){
         @Override
         public int getUp() {
-            return up;
+            return -1;
         }
         @Override
         public int getDown() {
-            return down;
+            return 1;
         }
         public boolean white(){
             return true;
@@ -31,11 +31,11 @@ public enum PieceColour {
     },
     BLACK(){
         public int getUp() {
-            return up;
+            return -1;
         }
         @Override
         public int getDown() {
-            return down;
+            return 1;
         }
         public boolean white(){
             return false;
@@ -58,8 +58,7 @@ public enum PieceColour {
 //    PieceColour(int num) {
 //        this.num = num;
 //    }
-    int up = -1;
-    int down = 1;
+
     public abstract int getUp();
     public abstract int getDown();
     public abstract boolean white();

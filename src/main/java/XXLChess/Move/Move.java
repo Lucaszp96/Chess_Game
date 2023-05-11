@@ -54,17 +54,29 @@ public abstract class Move {
 
     public Board active() {
         Board.BoardBuilder builder =new Board.BoardBuilder();
-        for (Piece piece : this.board.currentPlayer().allActivePieces()){ // Gain current player's all pieces
-            if (!this.movePiece.equals(piece)){ //if the piece in current player is not a move piece, set them into new board(no change), only moved piece do next step
+        // If current moved piece belongs to current player
+        if (this.board.currentPlayer().pieceColour().equals(this.movePiece.pieceColour())){
+            for (Piece piece : this.board.currentPlayer().allActivePieces()){ // Gain current player's all pieces
+                if (!this.movePiece.equals(piece)){ //if the piece in current player is not a move piece, set them into new board(no change), only moved piece do next step
+                    builder.setPiece(piece);
+                }
+            }
+            for (Piece piece : this.board.currentPlayer().getEnemy().allActivePieces()) { // Gain opponent player's all pieces
                 builder.setPiece(piece);
             }
+            //TODO weather first move
+            builder.setPiece(this.movePiece.movePiece(this)); // moved piece is moving
+            builder.setMovePlayer(this.board.currentPlayer().getEnemy().pieceColour());
+        }else {
+            for (Piece piece : this.board.currentPlayer().allActivePieces()){ // Gain current player's all pieces
+                builder.setPiece(piece);
+            }
+            for (Piece piece : this.board.currentPlayer().getEnemy().allActivePieces()) { // Gain opponent player's all pieces
+                builder.setPiece(piece);
+            }
+            // ! delete
+            builder.setMovePlayer(this.board.currentPlayer().getEnemy().pieceColour());
         }
-        for (Piece piece : this.board.currentPlayer().getEnemy().allActivePieces()) { // Gain opponent player's all pieces
-            builder.setPiece(piece);
-        }
-        //TODO weather first move
-        builder.setPiece(this.movePiece.movePiece(this)); // moved piece is moving
-        builder.setMovePlayer(this.board.currentPlayer().getEnemy().pieceColour());
         return builder.build();
     }
 
