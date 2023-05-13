@@ -4,29 +4,32 @@ package XXLChess;
 //import org.reflections.scanners.Scanners;
 
 import XXLChess.Board.Board;
-import XXLChess.Board.ReadConfig;
 import XXLChess.Board.Tile;
 import XXLChess.Move.Move;
 import XXLChess.Move.MoveToTile;
 import XXLChess.Piece.Piece;
-import com.jogamp.opengl.GLProfile;
+import XXLChess.Piece.PieceColour;
+import XXLChess.Sounds.Sound;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONObject;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
-import java.util.List;
-import java.io.*;
-import java.util.*;
 
-import static XXLChess.Board.Board.BoardBuilder.boardCode;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static XXLChess.Board.Board.initialBoard;
-import static XXLChess.Board.MappingTile.*;
-import static XXLChess.Board.ReadConfig.*;
+import static XXLChess.Board.HighlightLegalMoves.pieceLegalMoves;
+import static XXLChess.Board.MappingTile.getXY;
+import static XXLChess.Board.MappingTile.mappingTiles;
+import static XXLChess.Board.ReadConfig.chessConfig;
+import static XXLChess.Player.Timer.showTimer;
 
-public class App extends PApplet {
+public class App<global> extends PApplet {
 
     public static final int SPRITESIZE = 480;
     public static final int CELLSIZE = 48;
@@ -48,6 +51,20 @@ public class App extends PApplet {
     public Piece playerMovedPiece;
     public static List<String> chessListConfig;
     public static String configPath;
+    public int whitePlayerTimer = 180;
+    public int blackPlayerTimer = 180;
+    public int frame;
+    public int s;
+    public boolean isMoving = false;
+    public int X,Y,targetX,targetY;
+    public PImage currentImage;
+    public PImage destinationTileImage;
+    public boolean fisrstSelect = true;
+    public boolean frozen = false;
+    public boolean restart = false;
+
+
+
     public App() {
         this.configPath = "config.json";
     }
@@ -64,6 +81,13 @@ public class App extends PApplet {
     */
     public void setup() {
         frameRate(FPS);
+        String timeTextWhite = showTimer(whitePlayerTimer);
+        String timeTextBlack = showTimer(whitePlayerTimer);
+
+        textSize(32);
+        textAlign(CENTER);
+        text(timeTextWhite, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT-CELLSIZE );
+        text(timeTextBlack, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), CELLSIZE );
         JSONObject conf = loadJSONObject(new File(this.configPath));
         File chessLayout = new File(conf.getString("layout"));
         chessListConfig = chessConfig(chessLayout);
@@ -162,18 +186,21 @@ public class App extends PApplet {
                 }
             }
         }
-
-        noLoop();
     }
     /**
      * Receive key pressed signal from the keyboard.
     */
     public void keyPressed(KeyEvent e){
         String pressed = String.valueOf(e.getKey());
-
         if (pressed.equals("e") || pressed.equals("E") ){
+            frozen = true;
             System.out.println(pressed);
-            exit();
+        }
+        if (pressed.equals("r") || pressed.equals("R")){
+            restart = true;
+//            inCheck = false;
+            setup();
+            redraw();
         }
     }
     
@@ -186,60 +213,88 @@ public class App extends PApplet {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        int mappingTileID = mappingTiles(e.getX(), e.getY());
+        if (!frozen){
+            int mappingTileID = mappingTiles(e.getX(), e.getY());
+            int[] xy = getXY(mappingTileID);
+
+
 //        ReadConfig rc = new ReadConfig();
 //        Map<String, PImage> chessTypeImageImage = rc.chessTypeImageImage();
-
-        if(e.getButton() == RIGHT){
-            tile = null;
-            destinationTile = null;
-            playerMovedPiece = null;
-//            System.out.println("RIGHT" + mouseButton);
-        }else if(e.getButton() == LEFT) {
-//            System.out.println("LEFT" + mouseButton);
-            if (tile == null){ // First selected
-                System.out.println("ID:" + mappingTileID);
-                tile = chessBoard.getTile(mappingTileID); // Get current tile
-                System.out.println("Tile:" + tile.getTileNowLocation());
-//                if(tile.getPiece() != null){
-                playerMovedPiece = tile.getPiece();
-//                System.out.println("Piece:" + playerMovedPiece.getPieceType());
-                if (playerMovedPiece == null){
-                    tile = null;
-                }else {
-                    //TODO highlight legalMoves
-                    System.out.println("Color:" + playerMovedPiece.pieceColour());
-                    System.out.println("Type:" + playerMovedPiece.getPieceColorType());
-                    System.out.println("-----------" );
-                }
-//                }
-            }else {
-                destinationTile = chessBoard.getTile(mappingTileID); // Get destination tile
-                System.out.println("Tile:" + tile.getTileNowLocation());
-                System.out.println("destinationTile:" + destinationTile.getTileNowLocation());
-                Move move = Move.MoveFactory.createMove(chessBoard, tile.getTileNowLocation(), destinationTile.getTileNowLocation());
-                MoveToTile moveToTile = chessBoard.currentPlayer().makeMove(move);
-//                System.out.println("nowMoveCheck:" + moveToTile.getMoveCheck().isDone());
-//                System.out.println("-----------" );
-                if (moveToTile.getMoveCheck().isDone()){
-                    chessBoard = moveToTile.getBoard();
-//                    chessBoard.getTile(tile.getTileNowLocation()) = Tile.createTile(tile.getTileNowLocation(), null);
-                    System.out.println(chessBoard.toString());
-                    //TODO Add the move that was mad to the move log
-                    //TODO redraw
-//                    x_y = getXY(mappingTileID);
-//                    System.out.println("x:" + x_y[0]);
-//                    System.out.println("y:" + x_y[1]);
-//                    System.out.println("now type:" + tile.getPiece().getPieceType());
-//                    System.out.println("Start Draw");
-//                    clear(image(chessTypeImage.get(tile.getPiece().getPieceColorType())));
-                    redraw();
-                }
+            if(e.getButton() == RIGHT){
                 tile = null;
                 destinationTile = null;
                 playerMovedPiece = null;
+                redraw();
+//            System.out.println("RIGHT" + mouseButton);
+            }else if(e.getButton() == LEFT) {
+//            System.out.println("LEFT" + mouseButton);
+                if (tile == null && e.getX()<=CELLSIZE*BOARD_WIDTH){ // First selected
+                    fisrstSelect = true;
+                    tile = chessBoard.getTile(mappingTileID); // Get current tile
+                    System.out.println("Tile:" + tile.getTileNowLocation());
+//                if(tile.getPiece() != null){
+                    playerMovedPiece = tile.getPiece();
+//                System.out.println("Piece:" + playerMovedPiece.getPieceType());
+                    if (playerMovedPiece == null || playerMovedPiece.pieceColour() != chessBoard.currentPlayer().pieceColour()){
+                        System.out.println("Tile:Null");
+                        tile = null;
+                    } else {
+//                        if (chessBoard.currentPlayer().inCheck()){
+//
+//                        }
+                        currentImage = chessTypeImage.get(playerMovedPiece.getPieceColorType());
+                        // 动画
+                        isMoving = true;
+                        X = xy[0];
+                        Y = xy[1];
+                        System.out.println("Color:" + playerMovedPiece.pieceColour());
+                        System.out.println("Type:" + playerMovedPiece.getPieceColorType());
+                        System.out.println("-----------" );
+                        redraw();// Highlight
+                    }
+//                }
+                } else if (e.getX()<=CELLSIZE*BOARD_WIDTH) {
+                    fisrstSelect = false;
+                    destinationTile = chessBoard.getTile(mappingTileID); // Get destination tile
+                    System.out.println("Tile:" + tile.getTileNowLocation());
+                    System.out.println("destinationTile:" + destinationTile.getTileNowLocation());
+                    Move move = Move.MoveFactory.createMove(chessBoard, tile.getTileNowLocation(), destinationTile.getTileNowLocation());
+                    if (move != Move.MoveFactory.getNullMove()){
+                        MoveToTile moveToTile = chessBoard.currentPlayer().makeMove(move);
+                        if (moveToTile.getMoveCheck().isDone()){//移动完成
+//                        inCheck = false;
+                            // 时间+2s
+                            if (chessBoard.currentPlayer().pieceColour().equals(PieceColour.WHITE)){
+                                whitePlayerTimer += 2;
+                            } else if (chessBoard.currentPlayer().pieceColour().equals(PieceColour.BLACK)) {
+                                blackPlayerTimer += 2;
+                            }
+                            //获取当前新游戏板
+                            chessBoard = moveToTile.getBoard();
+//                    chessBoard.getTile(tile.getTileNowLocation()) = Tile.createTile(tile.getTileNowLocation(), null);
+                            System.out.println(chessBoard.toString());
+                            // 重画
+                            redraw();
+                            if (isMoving){
+                                targetX = xy[0];
+                                targetY = xy[1];
+                            }
+                        }
+                    }
+
+
+//                System.out.println("nowMoveCheck:" + moveToTile.getMoveCheck().isDone());
+//                System.out.println("-----------" );
+
+
+
+                    tile = null;
+                    destinationTile = null;
+                    playerMovedPiece = null;
+                }
             }
         }
+
     }
 
     @Override
@@ -251,31 +306,41 @@ public class App extends PApplet {
      * Draw all elements in the game by current frame. 
     */
     public void draw() {
-        if(mousePressed){
-//            int x = mouseX;
-//            int y = mouseY;
-//            int px = pmouseX;
-//            int py = pmouseY;
-//            int tileId = mappingTiles(x, y);
-//            int pTileId = mappingTiles(px, py);
-//            int[] xyp = getXY(tileId);
-//            int[] pxyp = getXY(pTileId);
-//            image(chessTypeImage.get(chessBoard.getTile(tileId).getPiece().getPieceColorType()),xyp[1] * CELLSIZE, xyp[0] * CELLSIZE);
-//            fill(255);
-//            rect(pxyp[1] * CELLSIZE, pxyp[0]* CELLSIZE, CELLSIZE, CELLSIZE);
-//            System.out.println("x:"+x);
-//            System.out.println("y:"+y);
-//            System.out.println("px:"+px);
-//            System.out.println("py:"+py);
 
-            for (Tile tile : chessBoard.gameBoard) {
-                int tID = tile.getTileNowLocation();
+        background(180, 180, 180);
+        fill(180, 180, 180);
+        if (chessBoard.currentPlayer().checkMate()){
+//            You won by checkmate
+            String checkText = "You won by checkmate!";
+            fill(255);
+            textSize(10);
+            textAlign(CENTER,CENTER);
+            text(checkText, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT/2 );
+        }
+        if(!frozen || (frozen && restart)) {
+            //Timer
+            frame = frameCount;
+            if (chessBoard.currentPlayer().pieceColour().white() && (frame % 60 == 0)){ // 如果是白棋玩家
+                whitePlayerTimer -= 1;
+            } else if (chessBoard.currentPlayer().pieceColour().black() && (frame % 60 == 0)) {
+                blackPlayerTimer -= 1;
+            }
+            String timeTextWhite = showTimer(whitePlayerTimer);
+            fill(255);
+            textSize(32);
+            textAlign(CENTER);
+            text(timeTextWhite, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT-CELLSIZE );
+            String timeTextBlack = showTimer(blackPlayerTimer);
+            fill(255);
+            textSize(32);
+            textAlign(CENTER);
+            text(timeTextBlack, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), CELLSIZE );
+//            if(mousePressed){
+                for (Tile tile : chessBoard.gameBoard) {
+                    int tID = tile.getTileNowLocation();
 //              System.out.println("ID:" + tID + tile.isTileOccupied());
-                int[] xy = getXY(tID);
-                if (tile.isTileOccupied()) {
-//                  System.out.println("Type:" + tile.getPiece().getPieceColorType());
-                    image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE);
-                }else {
+                    int[] xy = getXY(tID);
+                    // board重画
                     if ((xy[0] + xy[1]) % 2 == 0){
                         fill(240, 217, 181);
                         rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
@@ -283,18 +348,101 @@ public class App extends PApplet {
                         fill(181, 136, 99);
                         rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
                     }
+                    //棋子重画
+                    if (tile.isTileOccupied() && fisrstSelect == true) {
+                        image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE); //第一次直接画棋子
+                    } else if (tile.isTileOccupied() && playerMovedPiece!= tile.getPiece()) {
+                        image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE); //第二次点击移动直接画棋子
+                    }
+                    // 动画没实现
+//                    else if (tile.isTileOccupied()) {
+//
+//                        if (isMoving && targetX!=0 && targetY!=0 && fisrstSelect == false){
+//                            int dx = targetX - X;
+//                            int dy = targetY - Y;
+//                            float distance = dist(X, Y, targetX, targetY);
+//                            if (distance > animationSpeed){//移动
+//                                X += dx / distance*animationSpeed;
+//                                Y += dy / distance*animationSpeed;
+//                            }else {//所选位置没有移动重置当前位置坐标。
+//                                X = targetX;
+//                                Y = targetY;
+//                                isMoving = false;
+//                            }
+//                            if (targetX!=0 && targetY!=0){
+//                                image(currentImage, targetY * CELLSIZE, targetX * CELLSIZE);
+//                            }
+//                        }
+//                    }
+                    //highlight
+                    if (fisrstSelect && playerMovedPiece!=null){
+                        if (chessBoard.currentPlayer().inCheck()){
+                            String checkText = "You must defend \n your king!";
+                            fill(255);
+                            textSize(10);
+                            textAlign(CENTER,CENTER);
+                            text(checkText, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT/3*2 );
+                        }
+                        for (Move move : pieceLegalMoves(chessBoard, playerMovedPiece)){ // fill legalMoves
+                            if (move.getDestination() == tID){
+                                if ((xy[0] + xy[1]) % 2 == 0){
+                                    fill(196, 224, 232);
+                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                                }else {
+                                    fill(170, 210, 221);
+                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                                }
+                                if ( chessBoard.getTile(tID).isTileOccupied() && (move.getMovePiece().pieceColour() != chessBoard.getTile(tID).getPiece().pieceColour())){
+                                    destinationTileImage = chessTypeImage.get(chessBoard.getTile(tID).getPiece().getPieceColorType());
+                                    fill(253, 163, 102);
+                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                                    image(destinationTileImage,xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                                }
+                            }
+                        }
+
+                    }
+                    //moveLog
+                    if (fisrstSelect && playerMovedPiece!=null && chessBoard.currentPlayer().pieceColour().equals(playerMovedPiece.pieceColour())) {
+                        fill(104, 137, 75);
+                        int currentPieceLocation = playerMovedPiece.pieceLocation();
+                        int[] currentPieceXY = getXY(currentPieceLocation);
+                        rect(currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                        image(currentImage, currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                    }
+
+                    // inCheck
+                    if ( chessBoard.currentPlayer().inCheck()){
+//                        inCheck = true;
+                        int kingLocation = chessBoard.currentPlayer().getPlayerKing().pieceLocation();
+                        System.out.println("KingLocation:" + kingLocation);
+                        PImage kingImage = chessTypeImage.get(chessBoard.currentPlayer().getPlayerKing().getPieceColorType());
+                        int[] kingXY = getXY(kingLocation);
+                        fill(215,0,0);
+                        rect(kingXY[1] * CELLSIZE, kingXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                        image(kingImage, kingXY[1] * CELLSIZE, kingXY[0] * CELLSIZE);
+                        String checkText = "Check!"; //"You must defend \n your king!";
+                        fill(255);
+                        textSize(10);
+                        textAlign(CENTER,CENTER);
+                        text(checkText, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT/2 );
+                    }
+                    if (chessBoard.currentPlayer().checkMate()){
+                        frozen = true;
+                    }
                 }
-            }
         }
-        noLoop();
     }
-	
-	// Add any additional methods or attributes you want. Please put classes in different files.
+    void frameRateChanged() {
+        frameRate(FPS);
+    }
+
+    // Add any additional methods or attributes you want. Please put classes in different files.
 
 
     public static void main(String[] args) {
-
         PApplet.main("XXLChess.App");
+        new Sound("chessBGM.wav");
     }
 
 }

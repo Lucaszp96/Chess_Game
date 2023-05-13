@@ -9,7 +9,6 @@ public class AttactMove extends Move{
         super(board, movePiece, destination);
         this.attackedPiece = attackedPiece;
     }
-
     @Override
     public boolean underAttack() {
         return true;
@@ -17,10 +16,6 @@ public class AttactMove extends Move{
     @Override
     public Piece attackPiece() {
         return this.attackedPiece;
-    }
-    @Override
-    public Board active() {
-        return null;
     }
     @Override
     public int hashCode() {
@@ -38,4 +33,10 @@ public class AttactMove extends Move{
         return super.equals(obj) && attackPiece().equals(restOfAttactMove.attackPiece());
     }
 
+    public static class PawnAttackMove extends AttactMove{
+
+        public PawnAttackMove(Board board, Piece movePiece, int destination, Piece attackedPiece) {
+            super(board, movePiece, destination, attackedPiece);
+        }
+    }
 }

@@ -11,9 +11,11 @@ import java.util.List;
 public class Archbishop extends Piece{
     private static final int[] ARCHBISHOP_MOVE_CANDIDATE = {-29, -27, -16, -15, -13,-12, 12, 13, 15, 16, 27, 29};
     public Archbishop(int pieceLocation, PieceColour piececolour) {
-        super("Archbishop",pieceLocation, piececolour);
+        super("Archbishop",pieceLocation, piececolour, true);
     }
-
+    public Archbishop(int pieceLocation, PieceColour piececolour, boolean firstMove) {
+        super("Archbishop",pieceLocation, piececolour, firstMove);
+    }
     @Override
     public List<Move> possibleMoves(Board board) {
         List<Move> legalMoves = new ArrayList<>();
@@ -22,7 +24,9 @@ public class Archbishop extends Piece{
                 int destination = this.pieceLocation; // Target tile
                 while (Board.isValid(destination)){
                     if (FirstColum(this.pieceLocation, currentCandidate) ||
-                            FirstToLastColum(this.pieceLocation, currentCandidate)) {
+                            FirstToLastColum(this.pieceLocation, currentCandidate) ||
+                            FirstColum(destination, currentCandidate) ||
+                            FirstToLastColum(destination, currentCandidate)) {
                         break;
                     }
                     destination +=currentCandidate;

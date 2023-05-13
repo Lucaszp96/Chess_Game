@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 import java.util.*;
-import java.lang.Character;
 
 import static XXLChess.App.BOARD_WIDTH;
 import static XXLChess.App.TILES_NUM;
@@ -28,7 +27,6 @@ public class Board {
         this.blackPieces = allPieceOnBoard(this.gameBoard, PieceColour.BLACK); //All black pieces
         List<Move> whitePieceMoves = legalMoves(this.whitePieces);
         List<Move> blackPieceMoves = legalMoves(this.blackPieces);
-        //TODO 生成缓存棋盘时pieceMoves得数量为23，20与程序启动时得34不符
         this.whitePlayer = new WhitePlayer(this, whitePieceMoves, blackPieceMoves);
         this.blackPlayer = new BlackPlayer(this, blackPieceMoves, whitePieceMoves);
         this.currentPlayer = boardBuilder.movePlayer.setPlayer(this.whitePlayer, this.blackPlayer);
@@ -107,15 +105,15 @@ public class Board {
                 } else if (chessListConfig.get(i).equals("H")) {
                     builder.setPiece(new Archbishop(i, PieceColour.BLACK));
                 } else if (chessListConfig.get(i).equals("C")) {
-                    builder.setPiece(new Camel(i, PieceColour.BLACK));// not finished
+                    builder.setPiece(new Camel(i, PieceColour.BLACK));
                 } else if (chessListConfig.get(i).equals("G")) {
-                    builder.setPiece(new KnightKing(i, PieceColour.BLACK));// not finished
+                    builder.setPiece(new Guard(i, PieceColour.BLACK));
                 } else if (chessListConfig.get(i).equals("A")) {
-                    builder.setPiece(new Amazon(i, PieceColour.BLACK));// not finished
+                    builder.setPiece(new Amazon(i, PieceColour.BLACK));
                 } else if (chessListConfig.get(i).equals("K")) {
                     builder.setPiece(new King(i, PieceColour.BLACK));
                 } else if (chessListConfig.get(i).equals("E")) {
-                    builder.setPiece(new Chancellor(i, PieceColour.BLACK));// not finished
+                    builder.setPiece(new Chancellor(i, PieceColour.BLACK));//TODO not finished Chancellor
                 } else if (chessListConfig.get(i).equals("Q")) {
                     builder.setPiece(new Queen(i, PieceColour.BLACK));
                 }
@@ -133,7 +131,7 @@ public class Board {
                 } else if (chessListConfig.get(i).equals("c")) {
                     builder.setPiece(new Camel(i, PieceColour.WHITE));// not finished
                 } else if (chessListConfig.get(i).equals("g")) {
-                    builder.setPiece(new KnightKing(i, PieceColour.WHITE));// not finished
+                    builder.setPiece(new Guard(i, PieceColour.WHITE));// not finished
                 } else if (chessListConfig.get(i).equals("a")) {
                     builder.setPiece(new Amazon(i, PieceColour.WHITE));// not finished
                 } else if (chessListConfig.get(i).equals("k")) {

@@ -4,6 +4,7 @@ import XXLChess.Board.Board;
 import XXLChess.Move.Move;
 import XXLChess.Move.MoveCheck;
 import XXLChess.Move.MoveToTile;
+import XXLChess.Move.NullMove;
 import XXLChess.Piece.King;
 import XXLChess.Piece.Piece;
 import XXLChess.Piece.PieceColour;
@@ -60,7 +61,7 @@ public abstract class Player {
     }
 
     public MoveToTile makeMove(Move move){
-        if (!isLegalMove(move)){ // Illegal move return current game board
+        if (!isLegalMove(move)) { // Illegal move return current game board
             System.out.println("ILLEGAL_MOVE");
             return new MoveToTile(this.board, move, MoveCheck.ILLEGAL_MOVE);
         }

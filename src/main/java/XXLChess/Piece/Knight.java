@@ -11,7 +11,10 @@ import java.util.List;
 public class Knight extends Piece{
     private static final int[] MOVE_CANDIDATE = {-29, -27, -16, -12, 12, 16, 27, 29};
     public Knight(int pieceLocation, PieceColour piececolour) {
-        super("Knight", pieceLocation, piececolour);
+        super("Knight", pieceLocation, piececolour, true);
+    }
+    public Knight(int pieceLocation, PieceColour piececolour, boolean firstMove) {
+        super("Knight", pieceLocation, piececolour, firstMove);
     }
 
     @Override
@@ -48,15 +51,12 @@ public class Knight extends Piece{
         return BoardUtils.FIRST_COLUMN[currentPosition] && (candidatePosition == -29 || candidatePosition == -16 ||
                 candidatePosition == 12 ||candidatePosition == 27);
     }
-
     private static boolean SecondColumn(int currentPosition, int candidatePosition){
-        return BoardUtils.SECOND_COLUMN[currentPosition] && (candidatePosition == -27 || candidatePosition == 12);
+        return BoardUtils.SECOND_COLUMN[currentPosition] && (candidatePosition == -16 || candidatePosition == 12);
     }
-
     private static boolean SecondToLastColum(int currentPosition, int candidatePosition){
-        return BoardUtils.SECOND_TO_LAST_COLUMN[currentPosition] && (candidatePosition == -12 || candidatePosition == 27);
+        return BoardUtils.SECOND_TO_LAST_COLUMN[currentPosition] && (candidatePosition == -12 || candidatePosition == 16);
     }
-
     private static boolean FirstToLastColum(int currentPosition, int candidatePosition){
         return BoardUtils.FIRST_TO_LAST_COLUMN[currentPosition] && (candidatePosition == -27 || candidatePosition == -12 ||
                 candidatePosition == 16 || candidatePosition == 29);

@@ -2,7 +2,7 @@ package XXLChess.Move;
 
 import XXLChess.Board.Board;
 
-public class MoveToTile {//棋子移动过渡
+public class  MoveToTile {//棋子移动过渡
     private Board board;
     private Move move;
     private MoveCheck moveCheck; //moveStatus

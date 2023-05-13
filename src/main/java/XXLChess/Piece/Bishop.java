@@ -9,19 +9,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bishop extends Piece{
-    private static final int[] DIAGONALLY_MOVE_CANDIDATE = {-15, -13, 13, 15};
+    private static final int[] BISHOP_MOVE_CANDIDATE = {-15, -13, 13, 15};
     public Bishop(int pieceLocation, PieceColour piececolour) {
-        super("Bishop",pieceLocation, piececolour);
+        super("Bishop",pieceLocation, piececolour, true);
     }
-
+    public Bishop(int pieceLocation, PieceColour piececolour, boolean firstMove) {
+        super("Bishop",pieceLocation, piececolour, firstMove);
+    }
     @Override
     public List<Move> possibleMoves(Board board) {
         List<Move> legalMoves = new ArrayList<>();
-        for (int currentCandidate: DIAGONALLY_MOVE_CANDIDATE){
+        for (int currentCandidate: BISHOP_MOVE_CANDIDATE){
             int destination = this.pieceLocation; //目标格子
             while (Board.isValid(destination)){//目标格子在棋盘上继续找下一个
                 if (FirstColum(this.pieceLocation, currentCandidate) ||
-                        FirstToLastColum(this.pieceLocation, currentCandidate)) {
+                        FirstToLastColum(this.pieceLocation, currentCandidate)||
+                        FirstColum(destination, currentCandidate) ||
+                        FirstToLastColum(destination, currentCandidate)) {
                     break;
                 }
                 destination +=currentCandidate;

@@ -11,9 +11,11 @@ import java.util.List;
 public class Queen extends Piece{
     private static final int[] QUEEN_MOVE_CANDIDATE = {-15, -14, -13, -1, 1, 13, 14, 15};
     public Queen(int pieceLocation, PieceColour piececolour) {
-        super("Queen", pieceLocation, piececolour);
+        super("Queen", pieceLocation, piececolour, true);
     }
-
+    public Queen(int pieceLocation, PieceColour piececolour, boolean firstMove) {
+        super("Queen", pieceLocation, piececolour, firstMove);
+    }
     @Override
     public List<Move> possibleMoves(Board board) {
         List<Move> legalMoves = new ArrayList<>();
@@ -21,7 +23,9 @@ public class Queen extends Piece{
             int destination = this.pieceLocation; //目标格子
             while (Board.isValid(destination)){//目标格子在棋盘上继续找下一个
                 if (FirstColum(this.pieceLocation, currentCandidate) ||
-                        FirstToLastColum(this.pieceLocation, currentCandidate)) {
+                        FirstToLastColum(this.pieceLocation, currentCandidate) ||
+                                FirstColum(destination, currentCandidate) ||
+                                FirstToLastColum(destination, currentCandidate)) {
                     break;
                 }
                 destination +=currentCandidate;

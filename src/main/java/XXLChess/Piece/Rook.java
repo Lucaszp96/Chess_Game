@@ -11,7 +11,10 @@ import java.util.List;
 public class Rook extends Piece{
     private static final int[] ROOK_MOVE_CANDIDATE = {-14, -1, 1, 14};
     public Rook(int pieceLocation, PieceColour piececolour) {
-        super("Rook", pieceLocation, piececolour);
+        super("Rook", pieceLocation, piececolour, true);
+    }
+    public Rook(int pieceLocation, PieceColour piececolour, boolean firstMove) {
+        super("Rook", pieceLocation, piececolour, firstMove);
     }
     @Override
     public List<Move> possibleMoves(Board board) {
@@ -20,7 +23,9 @@ public class Rook extends Piece{
             int destination = this.pieceLocation; //目标格子
             while (Board.isValid(destination)){//目标格子在棋盘上继续找下一个
                 if (FirstColum(this.pieceLocation, currentCandidate) ||
-                        FirstToLastColum(this.pieceLocation, currentCandidate)) {
+                        FirstToLastColum(this.pieceLocation, currentCandidate) ||
+                        FirstColum(destination, currentCandidate) ||
+                        FirstToLastColum(destination, currentCandidate)) {
                     break;
                 }
                 destination +=currentCandidate;

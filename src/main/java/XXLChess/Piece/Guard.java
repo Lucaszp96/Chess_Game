@@ -8,19 +8,24 @@ import XXLChess.Move.NonAttackMove;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KnightKing extends Piece{
-    private static final int[] KING_MOVE_CANDIDATE = {-15, -14, -13, -1, 1, 13, 14, 15};
-    public KnightKing(int pieceLocation, PieceColour piececolour) {
-        super("KnightKing", pieceLocation, piececolour);
+public class Guard extends Piece{
+    private static final int[] GUARD_MOVE_CANDIDATE = {-29, -27, -16, -15, -14, -13, -12, -1, 1, 12, 13, 14, 15, 16, 27, 29};
+    public Guard(int pieceLocation, PieceColour piececolour) {
+        super("Guard", pieceLocation, piececolour, true);
     }
-
+    public Guard(int pieceLocation, PieceColour piececolour, boolean firstMove) {
+        super("Guard", pieceLocation, piececolour, firstMove);
+    }
     @Override
     public List<Move> possibleMoves(Board board) {
         List<Move> legalMoves = new ArrayList<>();
-        for (int currentCandidate: KING_MOVE_CANDIDATE){
+        for (int currentCandidate: GUARD_MOVE_CANDIDATE){
             int destination = this.pieceLocation + currentCandidate; //目标格子
             if (Board.isValid(destination)){//判断棋子位置是否合法
-                if (FirstColum(this.pieceLocation, currentCandidate) || FirstToLastColum(this.pieceLocation, currentCandidate)){//如果位于第一列或者最后一列，跳到下个循环
+                if (FirstColum(this.pieceLocation, currentCandidate) ||
+                        SecondColumn(this.pieceLocation, currentCandidate) ||
+                        SecondToLastColum(this.pieceLocation, currentCandidate) ||
+                        FirstToLastColum(this.pieceLocation, currentCandidate)){//如果位于第一列或者最后一列，跳到下个循环
                     continue;
                 }
                 Tile destinationTile = board.getTile(destination);
@@ -38,12 +43,18 @@ public class KnightKing extends Piece{
         return legalMoves;
     }
     @Override
-    public KnightKing movePiece(Move move) {
-        return new KnightKing(move.getDestination(), move.getMovePiece().pieceColour());
+    public Guard movePiece(Move move) {
+        return new Guard(move.getDestination(), move.getMovePiece().pieceColour());
     }
     private static boolean FirstColum(int currentPosition, int candidatePosition){
         return BoardUtils.FIRST_COLUMN[currentPosition] && (candidatePosition == -15 || candidatePosition == -1 ||
                 candidatePosition == 13);
+    }
+    private static boolean SecondColumn(int currentPosition, int candidatePosition){
+        return BoardUtils.SECOND_COLUMN[currentPosition] && (candidatePosition == -16 || candidatePosition == 12);
+    }
+    private static boolean SecondToLastColum(int currentPosition, int candidatePosition){
+        return BoardUtils.SECOND_TO_LAST_COLUMN[currentPosition] && (candidatePosition == -12 || candidatePosition == 16);
     }
     private static boolean FirstToLastColum(int currentPosition, int candidatePosition){
         return BoardUtils.FIRST_TO_LAST_COLUMN[currentPosition] && (candidatePosition == -13 || candidatePosition == 1 ||

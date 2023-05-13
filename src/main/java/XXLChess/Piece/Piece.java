@@ -12,12 +12,12 @@ public abstract class Piece {
     protected String pieceType;
     protected int code;
 
-    Piece(String pieceType, int pieceLocation, PieceColour piececolour){
+    Piece(String pieceType, int pieceLocation, PieceColour piececolour, boolean firstMove){
         this.pieceType = pieceType;
         this.pieceLocation = pieceLocation;
         this.pieceColour = piececolour;
         this.code = this.hashCode();
-        this.firstMove = true;
+        this.firstMove = firstMove;
     }
     public PieceColour pieceColour(){
         return this.pieceColour;

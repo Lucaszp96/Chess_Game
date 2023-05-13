@@ -1,5 +1,6 @@
 package XXLChess.Piece;
 
+import XXLChess.Board.BoardUtils;
 import XXLChess.Player.BlackPlayer;
 import XXLChess.Player.Player;
 import XXLChess.Player.WhitePlayer;
@@ -28,6 +29,10 @@ public enum PieceColour {
         public String toString() {
             return "White";
         }
+        @Override
+        public boolean pawnPromotion(int location) {
+            return BoardUtils.SEVENTH_RANK[location];
+        }
     },
     BLACK(){
         public int getUp() {
@@ -43,7 +48,6 @@ public enum PieceColour {
         public boolean black(){
             return true;
         }
-
         @Override
         public Player setPlayer(WhitePlayer whitePlayer, BlackPlayer blackPlayer) {
             return blackPlayer;
@@ -52,18 +56,15 @@ public enum PieceColour {
         public String toString() {
             return "Black";
         }
+        @Override
+        public boolean pawnPromotion(int location) {
+            return BoardUtils.EIGHTH_RANK[location];
+        }
     };
-
-
-//    PieceColour(int num) {
-//        this.num = num;
-//    }
-
     public abstract int getUp();
     public abstract int getDown();
     public abstract boolean white();
     public abstract boolean black();
-
-
+    public abstract boolean pawnPromotion(int location);
     public abstract  Player setPlayer(WhitePlayer whitePlayer, BlackPlayer blackPlayer);
 }
