@@ -7,9 +7,7 @@ import XXLChess.Player.Player;
 import XXLChess.Player.WhitePlayer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-
 import java.util.*;
-
 import static XXLChess.App.BOARD_WIDTH;
 import static XXLChess.App.TILES_NUM;
 
@@ -21,6 +19,11 @@ public class Board {
     private WhitePlayer whitePlayer;
     private BlackPlayer blackPlayer;
     private Player currentPlayer;
+    /**
+     * Board constructor.
+     *<p>Create a Board instance through this method. It includes game board, ceramic lattice, white player, black player, white player piece, black player piece, current player.<br>
+     * @param boardBuilder boardBuilder is a Builder, Builder can solve the problems which constructor have a lot of parameters.
+     */
     private  Board(BoardBuilder boardBuilder){
         this.gameBoard = createGameBoard(boardBuilder);
         this.whitePieces = allPieceOnBoard(this.gameBoard, PieceColour.WHITE); //All white pieces
@@ -31,28 +34,63 @@ public class Board {
         this.blackPlayer = new BlackPlayer(this, blackPieceMoves, whitePieceMoves);
         this.currentPlayer = boardBuilder.movePlayer.setPlayer(this.whitePlayer, this.blackPlayer);
     }
+    /**
+     * getTile is able to fetch every tile on the game board.
+     * @param destination int type parameter, specifying the tiles position.
+     * @return Returns the tile specified by the game board.
+     */
     public Tile getTile(int destination) {
 
         return gameBoard.get(destination);
     }
+    /**
+     * Get white player.
+     * @return Returns white player.
+     */
     public Player getWhitePlayer() {
         return this.whitePlayer;
     }
+    /**
+     * Get black player.
+     * @return Returns black player.
+     */
     public Player getBlackPlayer() {
         return this.blackPlayer;
     }
+    /**
+     * Get all white player's pieces.
+     * @return Returns all white player's pieces.
+     */
     public List<Piece> getWhitePieces(){
         return this.whitePieces;
     }
+    /**
+     * Get current player.
+     * @return Returns current player.
+     */
     public Player currentPlayer() {
         return this.currentPlayer;
     }
+    /**
+     * Get all black player's pieces.
+     * @return Returns all black player's pieces.
+     */
     public List<Piece> getBlackPieces(){
         return this.blackPieces;
     }
+    /**
+     * Determine whether the current tile position is legal.
+     * @param currentTile int type parameter, current tile position.
+     * @return
+     */
     public static boolean isValid(int currentTile) {
         return currentTile >= 0 && currentTile < (BOARD_WIDTH * BOARD_WIDTH);
     }
+    /**
+     * List stores the legal moves of all chess pieces.
+     * @param pieces A list of chess pieces.
+     * @return Returns a list stores the legal moves of all chess pieces.
+     */
     public List<Move> legalMoves(List<Piece> pieces) { //Add all pieces possibleMoves to legalMoves
         List<Move> legalMoves = new ArrayList<>();
         for (Piece piece : pieces){
@@ -60,11 +98,18 @@ public class Board {
         }
         return legalMoves;
     }
+    /**
+     * Get the legal moves of all pieces on the current board.
+     */
     public Iterable<Move> getAllLegalMoves(){
-//        List<Move> whitePlayerAllLegalMoves = this.whitePlayer.getAllLegalMoves();
-//        List<Move> blackPlayerAllLegalMoves = this.blackPlayer.getAllLegalMoves();
         return Iterables.unmodifiableIterable(Iterables.concat(this.whitePlayer.getAllLegalMoves(), this.blackPlayer.getAllLegalMoves()));
     }
+    /**
+     * Get all the pieces of the specified color on the current gameboard.
+     * @param gameBoard Current game board.
+     * @param pieceColour Specified piece color.
+     * @return A list stores all pieces specified color.
+     */
     public static List<Piece> allPieceOnBoard(List<Tile> gameBoard, PieceColour pieceColour) {// tracking all pieces(BLACK/WHITE)
         List<Piece> piecesOnBoard = new ArrayList<>();
         for (Tile tile : gameBoard){
@@ -77,7 +122,11 @@ public class Board {
         }
         return piecesOnBoard;
     }
-
+    /**
+     * Create a game board through tiles.
+     * @param boardBuilder boardBuilder is a Builder, Builder can solve the problems which constructor have a lot of parameters.
+     * @return A list stores all tiles.
+     */
     // this method is creat 14*14 game board mapping
     private static List<Tile> createGameBoard(BoardBuilder boardBuilder){
         Tile[] tiles = new Tile[TILES_NUM];
@@ -86,14 +135,18 @@ public class Board {
         }
         return ImmutableList.copyOf(tiles);
     }
+    /**
+     * Initialize a game board.
+     * <p> Create the initial chessboard by reading the chessboard configuration list to obtain the initial chess piece position. <br>
+     * @param chessListConfig Chessboard configuration list.
+     * @return Returns Builder build() method.
+     */
     public static Board initialBoard(List<String> chessListConfig){
-
         BoardBuilder builder = new BoardBuilder();
         for (int i = 0 ; i< TILES_NUM; i++){
             if (chessListConfig.get(i) == " "){
                 continue;
             }
-//            if (Character.isUpperCase(chessListConfig.get(i).charAt(0))){
                 if(chessListConfig.get(i).equals("P")){
                     builder.setPiece(new Pawn(i, PieceColour.BLACK));
                 } else if (chessListConfig.get(i).equals("R")) {
@@ -111,13 +164,12 @@ public class Board {
                 } else if (chessListConfig.get(i).equals("A")) {
                     builder.setPiece(new Amazon(i, PieceColour.BLACK));
                 } else if (chessListConfig.get(i).equals("K")) {
-                    builder.setPiece(new King(i, PieceColour.BLACK));
+                    builder.setPiece(new King(i, PieceColour.BLACK, true));
                 } else if (chessListConfig.get(i).equals("E")) {
-                    builder.setPiece(new Chancellor(i, PieceColour.BLACK));//TODO not finished Chancellor
+                    builder.setPiece(new Chancellor(i, PieceColour.BLACK));
                 } else if (chessListConfig.get(i).equals("Q")) {
                     builder.setPiece(new Queen(i, PieceColour.BLACK));
                 }
-//            }else{ //
                 if(chessListConfig.get(i).equals("p")){
                     builder.setPiece(new Pawn(i, PieceColour.WHITE));
                 } else if (chessListConfig.get(i).equals("r")) {
@@ -135,22 +187,20 @@ public class Board {
                 } else if (chessListConfig.get(i).equals("a")) {
                     builder.setPiece(new Amazon(i, PieceColour.WHITE));// not finished
                 } else if (chessListConfig.get(i).equals("k")) {
-                    builder.setPiece(new King(i, PieceColour.WHITE));
+                    builder.setPiece(new King(i, PieceColour.WHITE, true));
                 } else if (chessListConfig.get(i).equals("e")) {
                     builder.setPiece(new Chancellor(i, PieceColour.WHITE));// not finished
                 } else if (chessListConfig.get(i).equals("q")) {
                     builder.setPiece(new Queen(i, PieceColour.WHITE));
                 }
-//            }
         }
         builder.setMovePlayer(PieceColour.WHITE);
         return builder.build();
     }
-
     // Builder can solve the problems which constructor have a lot of parameters
     public static class BoardBuilder{
-        public static Map<Integer, Piece> boardCode;//boardconfig
-        public static PieceColour movePlayer;//nextMovemaker
+        public static Map<Integer, Piece> boardCode;
+        public static PieceColour movePlayer;
         public BoardBuilder(){
             this.boardCode = new HashMap<>();
         }
@@ -179,8 +229,4 @@ public class Board {
         }
         return builder.toString();
     }
-
-
-
-
 }

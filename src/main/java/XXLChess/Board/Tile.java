@@ -18,11 +18,31 @@ public abstract class Tile {
     Tile(int tileNowLocation) {
         this.tileNowLocation = tileNowLocation;
     }
+
+    /**
+     * Determine whether there is a piece on the current tile.
+     * @return true(Occupied), false(Not Occupied).
+     */
     public abstract boolean isTileOccupied();
+
+    /**
+     * Get piece on current tile.
+     * @return A piece.
+     */
     public abstract Piece getPiece();
+
+    /**
+     * Get current tile location.
+     * @return A tile location number.
+     */
     public int getTileNowLocation(){
         return this.tileNowLocation;
     }
+
+    /**
+     * Create an empty tile.
+     * @return A map, the key corresponds to the tile number, and the value corresponds to an empty tile.
+     */
     private static Map<Integer,EmptyTile> createEmptyTileMap(){
         Map<Integer,EmptyTile> emptyTileMap = new HashMap<>();
         for(int i = 0; i< TILES_NUM; i++){
@@ -30,6 +50,13 @@ public abstract class Tile {
         }
         return emptyTileMap;
     }
+
+    /**
+     * Create tiles based on whether there are pieces.
+     * @param tileNow Current tile number.
+     * @param piece Current piece on tile.
+     * @return Return a parameter emptyTileMaps if not piece on tile, return OccupiedTile() method.
+     */
     // create tile through a method
     public static Tile createTile(int tileNow, Piece piece){
         if(piece == null){

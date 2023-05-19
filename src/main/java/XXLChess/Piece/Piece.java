@@ -2,7 +2,6 @@ package XXLChess.Piece;
 
 import XXLChess.Board.Board;
 import XXLChess.Move.Move;
-
 import java.util.List;
 
 public abstract class Piece {
@@ -11,7 +10,6 @@ public abstract class Piece {
     protected boolean firstMove;
     protected String pieceType;
     protected int code;
-
     Piece(String pieceType, int pieceLocation, PieceColour piececolour, boolean firstMove){
         this.pieceType = pieceType;
         this.pieceLocation = pieceLocation;
@@ -27,11 +25,9 @@ public abstract class Piece {
     }
     // 判断棋子可能移动的位置。
     public abstract List<Move> possibleMoves(Board board);
-
     public void setFirstMove(boolean firstMove) {
         this.firstMove = firstMove;
     }
-
     public boolean firstMove() {
         return this.firstMove;
     }
@@ -39,7 +35,6 @@ public abstract class Piece {
     public String getPieceType() {
         return this.pieceType;
     }
-
     public abstract String getPieceColorType();
     public String getPieceLabel(PieceColour pieceColour, String pieceType) {
         String label = "";
@@ -61,7 +56,6 @@ public abstract class Piece {
         }else {
             code = constant * code + 0;
         }
-
         return code;
     }
     @Override
@@ -76,7 +70,4 @@ public abstract class Piece {
         return pieceLocation == restOfPiece.pieceLocation() && pieceType == restOfPiece.getPieceType() && pieceColour == restOfPiece.pieceColour() &&
                 firstMove == restOfPiece.firstMove();
     }
-//    public abstract String pieceType();
-
-
 }

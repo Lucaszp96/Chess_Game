@@ -1,25 +1,18 @@
 package XXLChess.Board;
 
-import processing.core.PImage;
-import processing.data.JSONObject;
-import processing.core.PApplet;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import static XXLChess.App.*;
-import static processing.core.PApplet.loadJSONObject;
-
-
-
-
 
 public class ReadConfig{
+    /**
+     * Read the chessboard configuration file.
+     * @param file Configuration file.
+     * @return A list stores contents of configuration file.
+     */
     public static List<String> chessConfig(File file){
         String[] chessListConfig = new String[TILES_NUM];
         String str;
@@ -44,7 +37,6 @@ public class ReadConfig{
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
         return Arrays.asList(chessListConfig);
     }
 }

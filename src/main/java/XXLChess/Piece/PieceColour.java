@@ -22,6 +22,10 @@ public enum PieceColour {
             return false;
         }
         @Override
+        public boolean setComputer() {
+            return false;
+        }
+        @Override
         public Player setPlayer(WhitePlayer whitePlayer, BlackPlayer blackPlayer) {
             return whitePlayer;
         }
@@ -49,6 +53,10 @@ public enum PieceColour {
             return true;
         }
         @Override
+        public boolean setComputer() {
+            return true;
+        }
+        @Override
         public Player setPlayer(WhitePlayer whitePlayer, BlackPlayer blackPlayer) {
             return blackPlayer;
         }
@@ -66,5 +74,6 @@ public enum PieceColour {
     public abstract boolean white();
     public abstract boolean black();
     public abstract boolean pawnPromotion(int location);
-    public abstract  Player setPlayer(WhitePlayer whitePlayer, BlackPlayer blackPlayer);
+    public abstract Player setPlayer(WhitePlayer whitePlayer, BlackPlayer blackPlayer);
+    public abstract boolean setComputer();
 }

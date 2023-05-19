@@ -54,7 +54,7 @@ public class Pawn extends Piece{
                         if (this.pieceColour.pawnPromotion(destination)){
                             legalMoves.add(new PawnPromotion(new MoveOfPawn(board, this, destination)));
                         }else {
-                            legalMoves.add(new MoveOfPawn(board, this, destination));//TODO pawn攻击移动
+                            legalMoves.add(new MoveOfPawn(board, this, destination));
                         }
                     }
                 }
@@ -67,7 +67,7 @@ public class Pawn extends Piece{
                         if (this.pieceColour.pawnPromotion(destination)){
                             legalMoves.add(new PawnPromotion (new MoveOfPawn(board, this, destination)));
                         }else {
-                            legalMoves.add(new MoveOfPawn(board, this, destination));//TODO pawn攻击移动
+                            legalMoves.add(new MoveOfPawn(board, this, destination));
                         }
                     }
                 }

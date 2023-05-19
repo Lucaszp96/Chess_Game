@@ -46,6 +46,10 @@ test {
     ignoreFailures = true
 }
 
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {

@@ -29,28 +29,27 @@ public class WhitePlayer extends Player{
     public Player getEnemy() {
         return this.board.getBlackPlayer();
     }
-
     @Override
     public List<Move> castling(List<Move> playerMoves, List<Move> enemyMoves) {
         List<Move> castling = new ArrayList<>();
         if (this.playerKing.firstMove() && !this.inCheck()){
-            if (!this.board.getTile(playerKing.pieceLocation()+1).isTileOccupied() &&
-                    !this.board.getTile(playerKing.pieceLocation()+2).isTileOccupied()){// right castling
+            if (!this.board.getTile(190).isTileOccupied() &&
+                    !this.board.getTile(191).isTileOccupied()){// right castling
                 Tile rookTile = this.board.getTile(195);
-                if(rookTile.isTileOccupied() && rookTile.getPiece().firstMove()){
-                    if (Player.underAttacks(playerKing.pieceLocation()+1, enemyMoves).isEmpty() &&
-                            Player.underAttacks(playerKing.pieceLocation()+2, enemyMoves).isEmpty() &&
+                if(rookTile.isTileOccupied() && rookTile.getPiece().firstMove() && (rookTile.getPiece().getPieceColorType().equals("R") || rookTile.getPiece().getPieceColorType().equals("r"))){
+                    if (Player.underAttacks(190, enemyMoves).isEmpty() &&
+                            Player.underAttacks(191, enemyMoves).isEmpty() &&
                             (rookTile.getPiece().getPieceColorType().equals("R") || rookTile.getPiece().getPieceColorType().equals("r") )) { //king 189
                         castling.add(new CastleMove(this.board, this.playerKing, 191, (Rook) rookTile.getPiece(), rookTile.getTileNowLocation(), 190)); //playerKing.pieceLocation()+1
                     }
                 }
             }
-            if (!this.board.getTile(playerKing.pieceLocation()-1).isTileOccupied() &&
-                    !this.board.getTile(playerKing.pieceLocation()-2).isTileOccupied()){// left castling
+            if (!this.board.getTile(188).isTileOccupied() &&
+                    !this.board.getTile(187).isTileOccupied()){// left castling
                 Tile rookTile = this.board.getTile(182);
-                if(rookTile.isTileOccupied() && rookTile.getPiece().firstMove()){
-                    if (Player.underAttacks(playerKing.pieceLocation()-1, enemyMoves).isEmpty() &&
-                            Player.underAttacks(playerKing.pieceLocation()-2, enemyMoves).isEmpty() &&
+                if(rookTile.isTileOccupied() && rookTile.getPiece().firstMove() && (rookTile.getPiece().getPieceColorType().equals("R") || rookTile.getPiece().getPieceColorType().equals("r"))){
+                    if (Player.underAttacks(188, enemyMoves).isEmpty() &&
+                            Player.underAttacks(187, enemyMoves).isEmpty() &&
                             (rookTile.getPiece().getPieceColorType().equals("R") || rookTile.getPiece().getPieceColorType().equals("r"))){
                         castling.add(new CastleMove(this.board, this.playerKing, 187, (Rook) rookTile.getPiece(), rookTile.getTileNowLocation(), 188));
                     }

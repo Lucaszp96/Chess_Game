@@ -35,14 +35,12 @@ public class App<global> extends PApplet {
     public static final int CELLSIZE = 48;
     public static final int SIDEBAR = 120;
     public static final int BOARD_WIDTH = 14;
-    public  static final  int TILES_NUM = BOARD_WIDTH*BOARD_WIDTH;
-    public static int WIDTH = CELLSIZE*BOARD_WIDTH+SIDEBAR;
-    public static int HEIGHT = BOARD_WIDTH*CELLSIZE;
+    public static final int TILES_NUM = BOARD_WIDTH * BOARD_WIDTH;
+    public static int WIDTH = CELLSIZE * BOARD_WIDTH + SIDEBAR;
+    public static int HEIGHT = BOARD_WIDTH * CELLSIZE;
     public static Map<String, PImage> chessTypeImage = new HashMap<>();
     public static int[] x_y;
     public static final int FPS = 60;
-
-
 
 
     private Board chessBoard;
@@ -56,14 +54,14 @@ public class App<global> extends PApplet {
     public int frame;
     public int s;
     public boolean isMoving = false;
-    public int X,Y,targetX,targetY;
+    public int targetX, targetY;
     public PImage currentImage;
     public PImage destinationTileImage;
     public boolean fisrstSelect = true;
     public boolean frozen = false;
     public boolean restart = false;
-
-
+    public int pieceLogLocation = -1;
+    public int pieceMoveLogLocation = -1;
 
     public App() {
         this.configPath = "config.json";
@@ -71,14 +69,14 @@ public class App<global> extends PApplet {
 
     /**
      * Initialise the setting of the window size.
-    */
+     */
     public void settings() {
         size(WIDTH, HEIGHT);
     }
 
     /**
      * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
-    */
+     */
     public void setup() {
         frameRate(FPS);
         String timeTextWhite = showTimer(whitePlayerTimer);
@@ -86,8 +84,8 @@ public class App<global> extends PApplet {
 
         textSize(32);
         textAlign(CENTER);
-        text(timeTextWhite, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT-CELLSIZE );
-        text(timeTextBlack, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), CELLSIZE );
+        text(timeTextWhite, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT - CELLSIZE);
+        text(timeTextBlack, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), CELLSIZE);
         JSONObject conf = loadJSONObject(new File(this.configPath));
         File chessLayout = new File(conf.getString("layout"));
         chessListConfig = chessConfig(chessLayout);
@@ -187,258 +185,374 @@ public class App<global> extends PApplet {
             }
         }
     }
+
     /**
      * Receive key pressed signal from the keyboard.
-    */
-    public void keyPressed(KeyEvent e){
+     */
+    public void keyPressed(KeyEvent e) {
         String pressed = String.valueOf(e.getKey());
-        if (pressed.equals("e") || pressed.equals("E") ){
+        if (pressed.equals("e") || pressed.equals("E")) {
             frozen = true;
             System.out.println(pressed);
+            String checkText = "You resigned!";
+            fill(255);
+            textSize(15);
+            textAlign(CENTER, CENTER);
+            text(checkText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 3 * 2);
+
         }
-        if (pressed.equals("r") || pressed.equals("R")){
+        if (pressed.equals("r") || pressed.equals("R")) {
+            loop();
             restart = true;
-//            inCheck = false;
+            fisrstSelect = true;
+            frozen = false;
+            pieceLogLocation = -1;
+            pieceMoveLogLocation = -1;
+            whitePlayerTimer = 180;
+            blackPlayerTimer = 180;
             setup();
             redraw();
         }
     }
-    
+
     /**
      * Receive key released signal from the keyboard.
-    */
-    public void keyReleased(){
+     */
+    public void keyReleased() {
 
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (!frozen){
+
+        if (!frozen) {
             int mappingTileID = mappingTiles(e.getX(), e.getY());
             int[] xy = getXY(mappingTileID);
 
-
-//        ReadConfig rc = new ReadConfig();
-//        Map<String, PImage> chessTypeImageImage = rc.chessTypeImageImage();
-            if(e.getButton() == RIGHT){
+            if (e.getButton() == RIGHT) {
                 tile = null;
                 destinationTile = null;
                 playerMovedPiece = null;
                 redraw();
 //            System.out.println("RIGHT" + mouseButton);
-            }else if(e.getButton() == LEFT) {
-//            System.out.println("LEFT" + mouseButton);
-                if (tile == null && e.getX()<=CELLSIZE*BOARD_WIDTH){ // First selected
+            } else if (e.getButton() == LEFT) {
+                if (tile == null && e.getX() <= CELLSIZE * BOARD_WIDTH) { // First selected, chose piece
                     fisrstSelect = true;
                     tile = chessBoard.getTile(mappingTileID); // Get current tile
                     System.out.println("Tile:" + tile.getTileNowLocation());
-//                if(tile.getPiece() != null){
                     playerMovedPiece = tile.getPiece();
-//                System.out.println("Piece:" + playerMovedPiece.getPieceType());
-                    if (playerMovedPiece == null || playerMovedPiece.pieceColour() != chessBoard.currentPlayer().pieceColour()){
+                    if (playerMovedPiece == null || playerMovedPiece.pieceColour() != chessBoard.currentPlayer().pieceColour()) {
                         System.out.println("Tile:Null");
                         tile = null;
                     } else {
-//                        if (chessBoard.currentPlayer().inCheck()){
-//
-//                        }
                         currentImage = chessTypeImage.get(playerMovedPiece.getPieceColorType());
+                        pieceLogLocation = playerMovedPiece.pieceLocation();
                         // 动画
                         isMoving = true;
-                        X = xy[0];
-                        Y = xy[1];
                         System.out.println("Color:" + playerMovedPiece.pieceColour());
                         System.out.println("Type:" + playerMovedPiece.getPieceColorType());
-                        System.out.println("-----------" );
+                        System.out.println("-----------");
                         redraw();// Highlight
                     }
 //                }
-                } else if (e.getX()<=CELLSIZE*BOARD_WIDTH) {
+                } else if (e.getX() <= CELLSIZE * BOARD_WIDTH) {// Second selected, move piece
                     fisrstSelect = false;
                     destinationTile = chessBoard.getTile(mappingTileID); // Get destination tile
+
                     System.out.println("Tile:" + tile.getTileNowLocation());
                     System.out.println("destinationTile:" + destinationTile.getTileNowLocation());
                     Move move = Move.MoveFactory.createMove(chessBoard, tile.getTileNowLocation(), destinationTile.getTileNowLocation());
-                    if (move != Move.MoveFactory.getNullMove()){
+                    if (move != Move.MoveFactory.getNullMove()) {
                         MoveToTile moveToTile = chessBoard.currentPlayer().makeMove(move);
-                        if (moveToTile.getMoveCheck().isDone()){//移动完成
-//                        inCheck = false;
+                        if (moveToTile.getMoveCheck().isDone()) {//移动完成
+                            pieceMoveLogLocation = move.getDestination();
                             // 时间+2s
-                            if (chessBoard.currentPlayer().pieceColour().equals(PieceColour.WHITE)){
+                            if (chessBoard.currentPlayer().pieceColour().equals(PieceColour.WHITE)) {
                                 whitePlayerTimer += 2;
                             } else if (chessBoard.currentPlayer().pieceColour().equals(PieceColour.BLACK)) {
                                 blackPlayerTimer += 2;
                             }
                             //获取当前新游戏板
                             chessBoard = moveToTile.getBoard();
-//                    chessBoard.getTile(tile.getTileNowLocation()) = Tile.createTile(tile.getTileNowLocation(), null);
-                            System.out.println(chessBoard.toString());
+                            System.out.println(chessBoard.toString()); //print gameBoard
                             // 重画
                             redraw();
-                            if (isMoving){
+                            if (isMoving) {
                                 targetX = xy[0];
                                 targetY = xy[1];
                             }
                         }
                     }
-
-
-//                System.out.println("nowMoveCheck:" + moveToTile.getMoveCheck().isDone());
-//                System.out.println("-----------" );
-
-
-
                     tile = null;
                     destinationTile = null;
                     playerMovedPiece = null;
-                }
-            }
-        }
-
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        
-    }
-
-    /**
-     * Draw all elements in the game by current frame. 
-    */
-    public void draw() {
-
-        background(180, 180, 180);
-        fill(180, 180, 180);
-        if (chessBoard.currentPlayer().checkMate()){
-//            You won by checkmate
-            String checkText = "You won by checkmate!";
-            fill(255);
-            textSize(10);
-            textAlign(CENTER,CENTER);
-            text(checkText, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT/2 );
-        }
-        if(!frozen || (frozen && restart)) {
-            //Timer
-            frame = frameCount;
-            if (chessBoard.currentPlayer().pieceColour().white() && (frame % 60 == 0)){ // 如果是白棋玩家
-                whitePlayerTimer -= 1;
-            } else if (chessBoard.currentPlayer().pieceColour().black() && (frame % 60 == 0)) {
-                blackPlayerTimer -= 1;
-            }
-            String timeTextWhite = showTimer(whitePlayerTimer);
-            fill(255);
-            textSize(32);
-            textAlign(CENTER);
-            text(timeTextWhite, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT-CELLSIZE );
-            String timeTextBlack = showTimer(blackPlayerTimer);
-            fill(255);
-            textSize(32);
-            textAlign(CENTER);
-            text(timeTextBlack, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), CELLSIZE );
-//            if(mousePressed){
-                for (Tile tile : chessBoard.gameBoard) {
-                    int tID = tile.getTileNowLocation();
-//              System.out.println("ID:" + tID + tile.isTileOccupied());
-                    int[] xy = getXY(tID);
-                    // board重画
-                    if ((xy[0] + xy[1]) % 2 == 0){
-                        fill(240, 217, 181);
-                        rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
-                    }else {
-                        fill(181, 136, 99);
-                        rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
-                    }
-                    //棋子重画
-                    if (tile.isTileOccupied() && fisrstSelect == true) {
-                        image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE); //第一次直接画棋子
-                    } else if (tile.isTileOccupied() && playerMovedPiece!= tile.getPiece()) {
-                        image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE); //第二次点击移动直接画棋子
-                    }
-                    // 动画没实现
-//                    else if (tile.isTileOccupied()) {
-//
-//                        if (isMoving && targetX!=0 && targetY!=0 && fisrstSelect == false){
-//                            int dx = targetX - X;
-//                            int dy = targetY - Y;
-//                            float distance = dist(X, Y, targetX, targetY);
-//                            if (distance > animationSpeed){//移动
-//                                X += dx / distance*animationSpeed;
-//                                Y += dy / distance*animationSpeed;
-//                            }else {//所选位置没有移动重置当前位置坐标。
-//                                X = targetX;
-//                                Y = targetY;
-//                                isMoving = false;
-//                            }
-//                            if (targetX!=0 && targetY!=0){
-//                                image(currentImage, targetY * CELLSIZE, targetX * CELLSIZE);
-//                            }
-//                        }
-//                    }
-                    //highlight
-                    if (fisrstSelect && playerMovedPiece!=null){
-                        if (chessBoard.currentPlayer().inCheck()){
-                            String checkText = "You must defend \n your king!";
-                            fill(255);
-                            textSize(10);
-                            textAlign(CENTER,CENTER);
-                            text(checkText, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT/3*2 );
-                        }
-                        for (Move move : pieceLegalMoves(chessBoard, playerMovedPiece)){ // fill legalMoves
-                            if (move.getDestination() == tID){
-                                if ((xy[0] + xy[1]) % 2 == 0){
-                                    fill(196, 224, 232);
-                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
-                                }else {
-                                    fill(170, 210, 221);
-                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
-                                }
-                                if ( chessBoard.getTile(tID).isTileOccupied() && (move.getMovePiece().pieceColour() != chessBoard.getTile(tID).getPiece().pieceColour())){
-                                    destinationTileImage = chessTypeImage.get(chessBoard.getTile(tID).getPiece().getPieceColorType());
-                                    fill(253, 163, 102);
-                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
-                                    image(destinationTileImage,xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
-                                }
-                            }
-                        }
-
-                    }
-                    //moveLog
-                    if (fisrstSelect && playerMovedPiece!=null && chessBoard.currentPlayer().pieceColour().equals(playerMovedPiece.pieceColour())) {
-                        fill(104, 137, 75);
-                        int currentPieceLocation = playerMovedPiece.pieceLocation();
-                        int[] currentPieceXY = getXY(currentPieceLocation);
-                        rect(currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
-                        image(currentImage, currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
-                    }
-
-                    // inCheck
-                    if ( chessBoard.currentPlayer().inCheck()){
+                    if (chessBoard.currentPlayer().inCheck()) {
 //                        inCheck = true;
                         int kingLocation = chessBoard.currentPlayer().getPlayerKing().pieceLocation();
                         System.out.println("KingLocation:" + kingLocation);
                         PImage kingImage = chessTypeImage.get(chessBoard.currentPlayer().getPlayerKing().getPieceColorType());
                         int[] kingXY = getXY(kingLocation);
-                        fill(215,0,0);
+                        fill(215, 0, 0);
                         rect(kingXY[1] * CELLSIZE, kingXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
                         image(kingImage, kingXY[1] * CELLSIZE, kingXY[0] * CELLSIZE);
                         String checkText = "Check!"; //"You must defend \n your king!";
                         fill(255);
                         textSize(10);
-                        textAlign(CENTER,CENTER);
-                        text(checkText, (CELLSIZE*BOARD_WIDTH) + (SIDEBAR/2), HEIGHT/2 );
-                    }
-                    if (chessBoard.currentPlayer().checkMate()){
-                        frozen = true;
+                        textAlign(CENTER, CENTER);
+                        text(checkText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 2);
+                        if (chessBoard.currentPlayer().getEnemy().checkMate()) {
+                            frozen = true;
+                            String checkMateText = "You lose by checkmate!";
+                            fill(255);
+                            textSize(10);
+                            textAlign(CENTER, CENTER);
+                            text(checkMateText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 2);
+                        }
                     }
                 }
+            }
         }
     }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    /**
+     * Draw all elements in the game by current frame.
+     */
+    public void draw() {
+        if (!frozen || (frozen && restart)) {
+            background(180, 180, 180);
+            fill(180, 180, 180);
+            //Timer
+            frame = frameCount;
+            if (chessBoard.currentPlayer().pieceColour().white() && (frame % 60 == 0)) { // 如果是白棋玩家
+                whitePlayerTimer -= 1;
+            } else if (chessBoard.currentPlayer().pieceColour().black() && (frame % 60 == 0)) {
+                blackPlayerTimer -= 1;
+            }
+            // show timer
+            String timeTextWhite = showTimer(whitePlayerTimer);
+            fill(255);
+            textSize(32);
+            textAlign(CENTER);
+            text(timeTextWhite, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT - CELLSIZE);
+            String timeTextBlack = showTimer(blackPlayerTimer);
+            fill(255);
+            textSize(32);
+            textAlign(CENTER);
+            text(timeTextBlack, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), CELLSIZE);
+            // show gameBoard
+
+            // Human
+            if (!chessBoard.currentPlayer().pieceColour().setComputer()) {
+                for (Tile tile : chessBoard.gameBoard) {
+                    int tID = tile.getTileNowLocation();
+//              System.out.println("ID:" + tID + tile.isTileOccupied());
+                    int[] xy = getXY(tID);
+                    // board重画
+                    if ((xy[0] + xy[1]) % 2 == 0) {
+                        fill(240, 217, 181);
+                        rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                    } else {
+                        fill(181, 136, 99);
+                        rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                    }
+                    if (!chessBoard.currentPlayer().inCheck()){
+                        // log
+                        if (tID == pieceLogLocation) {
+                            fill(104, 137, 75);
+                            int[] currentPieceXY = getXY(tID);
+                            rect(currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                        }
+                        if (tile.isTileOccupied() && tID == pieceMoveLogLocation && !fisrstSelect) {
+                            fill(104, 137, 75);
+                            int[] logPieceXY = getXY(tID);
+                            rect(logPieceXY[1] * CELLSIZE, logPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                            image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE);
+                        }
+                    }
+                    //棋子重画
+                    if (tile.isTileOccupied() && fisrstSelect == true && pieceMoveLogLocation == tID) {
+                        image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE); //第一次直接画棋子
+                    } else if (tile.isTileOccupied() && playerMovedPiece != tile.getPiece()) {
+                        image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE); //第二次点击移动直接画棋子,如果没有第二次点击游戏版棋子为空
+                    }
+                    //highlight
+                    if (fisrstSelect && playerMovedPiece != null) {
+                        if (chessBoard.currentPlayer().inCheck()) {
+                            String checkText = "You must defend \n your king!";
+                            fill(255);
+                            textSize(10);
+                            textAlign(CENTER, CENTER);
+                            text(checkText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 3 * 2);
+                        }
+                        for (Move move : pieceLegalMoves(chessBoard, playerMovedPiece)) { // fill legalMoves
+                            if (move.getDestination() == tID) {
+                                if ((xy[0] + xy[1]) % 2 == 0) {
+                                    fill(196, 224, 232);
+                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                                } else {
+                                    fill(170, 210, 221);
+                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                                }
+                                if (chessBoard.getTile(tID).isTileOccupied() && (move.getMovePiece().pieceColour() != chessBoard.getTile(tID).getPiece().pieceColour())) {
+                                    destinationTileImage = chessTypeImage.get(chessBoard.getTile(tID).getPiece().getPieceColorType());
+                                    fill(253, 163, 102);
+                                    rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                                    image(destinationTileImage, xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                                }
+                            }
+                        }
+                    }
+                    //moveChose
+                    if (fisrstSelect && playerMovedPiece != null && chessBoard.currentPlayer().pieceColour().equals(playerMovedPiece.pieceColour())) {
+                        fill(104, 137, 75);
+                        int currentPieceLocation = playerMovedPiece.pieceLocation();
+                        int[] currentPieceXY = getXY(currentPieceLocation);
+                        rect(currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                        image(currentImage, currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+
+                    }
+
+                    // inCheck
+                    if (chessBoard.currentPlayer().inCheck()) {
+//                        inCheck = true;
+                        int kingLocation = chessBoard.currentPlayer().getPlayerKing().pieceLocation();
+                        System.out.println("KingLocation:" + kingLocation);
+                        PImage kingImage = chessTypeImage.get(chessBoard.currentPlayer().getPlayerKing().getPieceColorType());
+                        int[] kingXY = getXY(kingLocation);
+                        fill(215, 0, 0);
+                        rect(kingXY[1] * CELLSIZE, kingXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                        image(kingImage, kingXY[1] * CELLSIZE, kingXY[0] * CELLSIZE);
+                        String checkText = "Check!"; //"You must defend \n your king!";
+                        fill(255);
+                        textSize(10);
+                        textAlign(CENTER, CENTER);
+                        text(checkText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 2);
+                    }
+                    if (chessBoard.currentPlayer().checkMate()) {
+                        frozen = true;
+                        String checkText = "You lose by checkmate!";
+                        fill(255);
+                        textSize(10);
+                        textAlign(CENTER, CENTER);
+                        text(checkText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 2);
+                    }
+                }
+            }
+
+            // AI 移动
+            if (chessBoard.currentPlayer().pieceColour().setComputer()) {
+
+                List<Piece> allAiPiece = chessBoard.currentPlayer().allActivePieces();
+                List<Move> possibleMove = chessBoard.currentPlayer().getAllLegalMoves();
+//                Piece movedPiece = allAiPiece.get((int) (Math.random() * allAiPiece.size()));
+                boolean select = true;
+//                List<Move> possibleMove = movedPiece.possibleMoves(chessBoard);
+                int siz = (int) (Math.random() * possibleMove.size());
+                Move randomMove = possibleMove.get(siz);
+                MoveToTile movedAiTile = chessBoard.currentPlayer().makeMove(randomMove);
+                Piece randomPiece = randomMove.getMovePiece();
+                pieceLogLocation = randomMove.getCurrentLocation();
+                pieceMoveLogLocation = randomMove.getDestination();
+                for (Tile tile : chessBoard.gameBoard) {
+                    int tID = tile.getTileNowLocation();
+                    int[] xy = getXY(tID);
+                    // board重画
+                    if ((xy[0] + xy[1]) % 2 == 0) {
+                        fill(240, 217, 181);
+                        rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                    } else {
+                        fill(181, 136, 99);
+                        rect(xy[1] * CELLSIZE, xy[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                    }
+                    if (!chessBoard.currentPlayer().inCheck()){
+                        // log
+                        if (tID == pieceLogLocation) {
+                            fill(104, 137, 75);
+                            int[] currentPieceXY = getXY(tID);
+                            rect(currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                        }
+                        if (tile.isTileOccupied() && tID == pieceMoveLogLocation) {
+                            fill(104, 137, 75);
+                            int[] logPieceXY = getXY(tID);
+                            rect(logPieceXY[1] * CELLSIZE, logPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                            image(chessTypeImage.get(randomPiece.getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE);
+                        }
+                    }
+
+                    //棋子重画
+                    if (tile.isTileOccupied() && select == true) {
+                        image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE); //第一次直接画棋子
+//                        if(randomPiece)
+                        select = false;
+                    } else if (tile.isTileOccupied() && randomPiece != tile.getPiece()) {
+                        image(chessTypeImage.get(tile.getPiece().getPieceColorType()), xy[1] * CELLSIZE, xy[0] * CELLSIZE); //第二次点击移动直接画棋子
+                    }
+//                    if (!select && randomPiece != null && chessBoard.currentPlayer().pieceColour().equals(randomPiece.pieceColour())) {
+//                        fill(104, 137, 75);
+//                        int[] currentPieceXY = getXY(randomPieceLocation);
+//                        rect(currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+//                        image(chessTypeImage.get(randomPiece.getPieceColorType()), currentPieceXY[1] * CELLSIZE, currentPieceXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+//                    }
+
+                }
+                chessBoard = movedAiTile.getBoard();
+                if (chessBoard.currentPlayer().inCheck()) {
+                    int kingLocation = chessBoard.currentPlayer().getPlayerKing().pieceLocation();
+                    System.out.println("KingLocation:" + kingLocation);
+                    PImage kingImage = chessTypeImage.get(chessBoard.currentPlayer().getPlayerKing().getPieceColorType());
+                    int[] kingXY = getXY(kingLocation);
+                    fill(215, 0, 0);
+                    rect(kingXY[1] * CELLSIZE, kingXY[0] * CELLSIZE, CELLSIZE, CELLSIZE);
+                    image(kingImage, kingXY[1] * CELLSIZE, kingXY[0] * CELLSIZE);
+                    String checkText = "Check!"; //"You must defend \n your king!";
+                    fill(255);
+                    textSize(10);
+                    textAlign(CENTER, CENTER);
+                    text(checkText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 3 * 2);
+                    if (chessBoard.currentPlayer().checkMate()) {
+                        String checkMateText = "You won by checkmate!";
+                        fill(255);
+                        textSize(10);
+                        textAlign(CENTER, CENTER);
+                        text(checkMateText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 2);
+                        frozen = true;
+                        noLoop();
+
+                    }
+                }
+            }
+            if (whitePlayerTimer <= 0 || blackPlayerTimer <= 0){
+                frozen = true;
+                String checkMateText = "You lose on time!";
+                fill(255);
+                textSize(10);
+                textAlign(CENTER, CENTER);
+                text(checkMateText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 2);
+                frozen = true;
+                noLoop();
+            }
+            if ( blackPlayerTimer <= 0){
+                frozen = true;
+                String checkMateText = "You won on time!";
+                fill(255);
+                textSize(10);
+                textAlign(CENTER, CENTER);
+                text(checkMateText, (CELLSIZE * BOARD_WIDTH) + (SIDEBAR / 2), HEIGHT / 2);
+                frozen = true;
+                noLoop();
+            }
+        }
+    }
+
     void frameRateChanged() {
         frameRate(FPS);
     }
-
     // Add any additional methods or attributes you want. Please put classes in different files.
-
 
     public static void main(String[] args) {
         PApplet.main("XXLChess.App");

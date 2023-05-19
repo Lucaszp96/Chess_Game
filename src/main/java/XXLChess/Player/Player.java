@@ -20,12 +20,11 @@ public abstract class Player {
     protected List<Move> allLegalMoves;
     protected boolean inCheck;
 
-    public Player(Board board, List<Move> legalMoves, List<Move> enemyMoves) {//oppoentMoves
+    public Player(Board board, List<Move> currentLegalMoves, List<Move> enemyMoves) {//oppoentMoves
         this.board = board;
         this.playerKing = fingKing(); // establishKing
-        legalMoves.addAll(castling(legalMoves, enemyMoves));
-//        this.allLegalMoves = (List<Move>) Iterables.concat(legalMoves, castling(legalMoves, enemyMoves));
-        this.allLegalMoves = legalMoves;
+        currentLegalMoves.addAll(castling(currentLegalMoves, enemyMoves));
+        this.allLegalMoves = currentLegalMoves;
         this.inCheck = !Player.underAttacks(this.playerKing.pieceLocation(), enemyMoves).isEmpty();//Do not have inCheck in constructor. it will lead to a Dead Loop
     }
     public King getPlayerKing() {
@@ -44,9 +43,9 @@ public abstract class Player {
         return this.inCheck && !hasEscapeMove();
     }
     private boolean hasEscapeMove() { //
-        for (Move move : this.allLegalMoves){
+        for (Move move : this.getPlayerKing().possibleMoves(board)){
             MoveToTile escape = makeMove(move);
-            if (escape.getMoveCheck().isDone()){ // moveCheck movetomove 都有isDown（）
+            if (escape.getMoveCheck().isDone()){ // moveCheck moveToTile 都有isDown（）
                 return true;
             }
         }
@@ -69,7 +68,6 @@ public abstract class Player {
         // Get all enemy's pieces
         List<Move> kingUnderAttacks = Player.underAttacks(transitionBoard.currentPlayer().getEnemy().getPlayerKing().pieceLocation(),
                                                             transitionBoard.currentPlayer().getAllLegalMoves());
-        //TODO check the rule
         //if(transitionBoard.currentPlayer().getEnemy().inCheck()){ // if king is being attacked return current game board and in check
         if(!kingUnderAttacks.isEmpty()){
             System.out.println("PLAYER_IN_CHECK");
@@ -99,5 +97,4 @@ public abstract class Player {
     public abstract PieceColour pieceColour();
     public abstract Player getEnemy();
     public abstract List<Move> castling(List<Move> playerMoves, List<Move> enemyMoves);
-
 }

@@ -12,9 +12,6 @@ public abstract class Move {
     final int destination;
     final boolean firstMove;
     public static Move NULLMOVE = new NullMove();
-    public static Move getNULLMOVE() {
-        return NULLMOVE;
-    }
 
     public Move(Board board, Piece movePiece, int destination) {
         this.board = board;
@@ -72,7 +69,6 @@ public abstract class Move {
                 getDestination() == restOfMove.getDestination() &&
                 getMovePiece().equals(restOfMove.getMovePiece());
     }
-
     public Board active() {
         Board.BoardBuilder builder =new Board.BoardBuilder();
         // If current moved piece belongs to current player
@@ -99,7 +95,6 @@ public abstract class Move {
         }
         return builder.build();
     }
-
     public static class MoveFactory{
         public static Move getNullMove(){
             return Move.NULLMOVE;
